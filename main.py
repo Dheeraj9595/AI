@@ -25,7 +25,7 @@ app.add_middleware(
 
 # API Configuration
 API_URL = "https://dheeraj9595.dheeraj-pandey.workers.dev/"
-API_TOKEN = os.getenv("API_TOKEN", "pridrEspigUVoYlfefruyUPRobr$rEpIprucRUspirlxLYiTA5LRakepiy9qibic")
+API_TOKEN = os.getenv("API_TOKEN", "")
 
 
 # Request Models
