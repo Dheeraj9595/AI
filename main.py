@@ -37,6 +37,8 @@ class SummarizeRequest(BaseModel):
 class GrammarCorrectionRequest(BaseModel):
     text: str = Field(..., description="Text to correct grammar for", min_length=1)
 
+class PolishText(BaseModel):
+    text: str = Field(..., description="Text to polish and refactor", min_length=10)
 
 class EntityExtractionRequest(BaseModel):
     text: str = Field(..., description="Text to extract entities from", min_length=1)
@@ -142,7 +144,31 @@ async def summarize_text(request: SummarizeRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to summarize text: {str(e)}")
 
+@app.post("/polish", response_model=APIResponse)
+async def polish(request: PolishText):
+    """
+    Polish the sentence and correct the formate of the sentence
 
+    Args:
+        request: Contains the text to Polish
+
+    Returns:
+        PolishText with the reformated text    
+    """
+
+    system_prompt = "Polish the language, correct the grammar, and reformat the following sentence to sound clear and professional."
+
+    prompt = f"Please Polish the sentence and improve the following text:\n\n{request.text}Return only the corrected version without additional explanations."
+
+    try:
+        result = await call_external_api(prompt, system_prompt)
+        return APIResponse(result=result, success=True)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to polish sentence: {str(e)}")
+        
+                
 @app.post("/grammar-correction", response_model=APIResponse)
 async def correct_grammar(request: GrammarCorrectionRequest):
     """
