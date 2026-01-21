@@ -28,6 +28,7 @@ API_URL = "https://dheeraj9595.dheeraj-pandey.workers.dev/"
 API_TOKEN = os.getenv("API_TOKEN", "")
 
 
+
 # Request Models
 class SummarizeRequest(BaseModel):
     text: str = Field(..., description="Text to summarize", min_length=1)
