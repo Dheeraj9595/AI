@@ -115,11 +115,23 @@ async def root():
     return {
         "message": "Text Processing API",
         "version": "1.0.0",
+        "status": "running",
         "endpoints": {
             "summarize": "/summarize",
             "grammar-correction": "/grammar-correction",
-            "entity-extraction": "/entity-extraction"
+            "entity-extraction": "/entity-extraction",
+            "health": "/health"
         }
+    }
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Render and monitoring"""
+    return {
+        "status": "healthy",
+        "service": "Text Processing API",
+        "version": "1.0.0"
     }
 
 
@@ -283,6 +295,7 @@ async def extract_entities(request: EntityExtractionRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
 #updated code

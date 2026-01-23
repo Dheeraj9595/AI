@@ -165,3 +165,47 @@ To use environment variables, create a `.env` file:
 ```
 API_TOKEN=your_token_here
 ```
+
+## Deployment to Render
+
+This application is ready to deploy on Render. Follow these steps:
+
+### Option 1: Using Render Dashboard
+
+1. **Create a new Web Service** on Render
+2. **Connect your repository** (GitHub/GitLab/Bitbucket)
+3. **Configure the service:**
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - **Environment:** Python 3
+4. **Add Environment Variables:**
+   - `API_TOKEN`: Your API token (e.g., `pridrEspigUVoYlfefruyUPRobr$rEpIprucRUspirlxLYiTA5LRakepiy9qibic`)
+   - `PORT`: Automatically set by Render (no need to set manually)
+5. **Deploy!**
+
+### Option 2: Using render.yaml (Infrastructure as Code)
+
+If you have `render.yaml` in your repository:
+
+1. **Create a new Blueprint** on Render
+2. **Connect your repository**
+3. **Render will automatically detect and use `render.yaml`**
+4. **Add the `API_TOKEN` environment variable** in the Render dashboard
+5. **Deploy!**
+
+### Environment Variables on Render
+
+Make sure to set the following environment variable in your Render service:
+- `API_TOKEN`: Your external API authentication token
+
+The `PORT` environment variable is automatically provided by Render - you don't need to set it manually.
+
+### Health Check
+
+The application includes a root endpoint (`/`) that can be used as a health check endpoint in Render.
+
+### Post-Deployment
+
+After deployment, your API will be available at:
+- `https://your-service-name.onrender.com`
+- API Documentation: `https://your-service-name.onrender.com/docs`
