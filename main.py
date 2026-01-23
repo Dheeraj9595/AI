@@ -43,6 +43,8 @@ class PolishText(BaseModel):
 class EntityExtractionRequest(BaseModel):
     text: str = Field(..., description="Text to extract entities from", min_length=1)
 
+class EntityExtractionRequest1(BaseModel):
+    text: str = Field(..., description="Text to extract entities from", min_length=5)
 
 # Response Models
 class APIResponse(BaseModel):
@@ -223,6 +225,60 @@ async def extract_entities(request: EntityExtractionRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to extract entities: {str(e)}")
+
+import re
+
+def parse_entities(llm_text: str) -> dict[str, list[str]]:
+    entities = {}
+    current_key = None
+
+    for line in llm_text.splitlines():
+        line = line.strip()
+
+        # Match entity header like **Person**
+        header_match = re.match(r"\*\*(.+?)\*\*", line)
+        if header_match:
+            current_key = header_match.group(1)
+            entities[current_key] = []
+            continue
+
+        # Match entity value like * Dheeraj
+        if line.startswith("*") and current_key:
+            value = line.lstrip("*").strip()
+            entities[current_key].append(value)
+
+    return entities
+
+
+@app.post("/entity-dict", response_model=APIResponse)
+async def extract_entities(request: EntityExtractionRequest):
+    system_prompt = (
+        "You are a helpful assistant specialized in Named Entity Recognition (NER). "
+        "Extract all named entities from the given text and organize them by category "
+        "(Person, Organization, Location, Date, Money, etc.). "
+        "Provide a clear and structured list of all entities found."
+    )
+
+    prompt = (
+        "Please extract all named entities from the following text and organize them by category:\n\n"
+        f"{request.text}\n\n"
+        "Provide a structured list showing entity type and the extracted entities."
+    )
+
+    try:
+        result = await call_external_api(prompt, system_prompt)
+        result = parse_entities(result)
+        return APIResponse(result=str(result), success=True)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to extract entities: {str(e)}"
+        )
+
+
+
 
 
 if __name__ == "__main__":
