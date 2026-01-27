@@ -25,6 +25,7 @@ app.add_middleware(
 
 # API Configuration
 API_URL = "https://dheeraj9595.dheeraj-pandey.workers.dev/"
+API_URL_IMAGE = "https://round-river-1dd8.dheeraj-pandey.workers.dev/"
 API_TOKEN = os.getenv("API_TOKEN", "")
 
 
@@ -107,6 +108,80 @@ async def call_external_api(prompt: str, system_prompt: str) -> str:
         raise HTTPException(status_code=e.response.status_code, detail=f"External API error: {e.response.text}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+
+from fastapi import HTTPException
+import httpx
+import base64
+
+async def call_external_api_for_image(prompt: str):
+    headers = {
+        "Authorization": f"Bearer {API_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "prompt": prompt
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(
+                API_URL_IMAGE,
+                json=payload,
+                headers=headers
+            )
+            response.raise_for_status()
+
+            content_type = response.headers.get("content-type", "")
+
+            # 🟢 CASE 1: Binary image
+            if content_type.startswith("image/"):
+                return {
+                    "type": "binary_image",
+                    "content_type": content_type,
+                    "image_bytes": response.content
+                }
+
+            # 🟢 CASE 2 & 3: JSON response
+            data = response.json()
+
+            if "image_url" in data:
+                return {
+                    "type": "image_url",
+                    "url": data["image_url"]
+                }
+
+            if "image" in data:
+                # base64 image
+                image_bytes = base64.b64decode(data["image"])
+                return {
+                    "type": "base64_image",
+                    "image_bytes": image_bytes
+                }
+
+            raise HTTPException(
+                status_code=500,
+                detail="Unsupported image response format"
+            )
+
+    except httpx.TimeoutException:
+        raise HTTPException(
+            status_code=504,
+            detail="Image generation API timed out"
+        )
+
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail=e.response.text
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unexpected error: {str(e)}"
+        )
 
 
 @app.get("/")
@@ -289,6 +364,20 @@ async def extract_entities(request: EntityExtractionRequest):
             detail=f"Failed to extract entities: {str(e)}"
         )
 
+
+
+
+
+from fastapi.responses import Response
+
+@app.post("/generate-image")
+async def generate_image(prompt: str):
+    result = await call_external_api_for_image(prompt)
+
+    return Response(
+        content=result["image_bytes"],
+        media_type=result["content_type"]
+    )
 
 
 
