@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 import httpx
 from typing import Optional
@@ -10,9 +12,12 @@ load_dotenv()
 
 app = FastAPI(
     title="Text Processing API",
-    description="API for text summarization, grammar correction, and entity extraction",
+    description="API for text summarization, grammar correction, entity extraction, and image generation",
     version="1.0.0"
 )
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Enable CORS
 app.add_middleware(
@@ -46,6 +51,10 @@ class EntityExtractionRequest(BaseModel):
 
 class EntityExtractionRequest1(BaseModel):
     text: str = Field(..., description="Text to extract entities from", min_length=5)
+
+
+class ImageGenerationRequest(BaseModel):
+    description: str = Field(..., description="Description of the image to generate", min_length=5)
 
 # Response Models
 class APIResponse(BaseModel):
@@ -186,7 +195,13 @@ async def call_external_api_for_image(prompt: str):
 
 @app.get("/")
 async def root():
-    """Root endpoint with API information"""
+    """Serve the frontend HTML"""
+    return FileResponse("static/index.html")
+
+
+@app.get("/api")
+async def api_info():
+    """API information endpoint"""
     return {
         "message": "Text Processing API",
         "version": "1.0.0",
@@ -195,6 +210,8 @@ async def root():
             "summarize": "/summarize",
             "grammar-correction": "/grammar-correction",
             "entity-extraction": "/entity-extraction",
+            "polish-text": "/polish-text",
+            "generate-image": "/generate-image",
             "health": "/health"
         }
     }
@@ -234,6 +251,7 @@ async def summarize_text(request: SummarizeRequest):
         raise HTTPException(status_code=500, detail=f"Failed to summarize text: {str(e)}")
 
 @app.post("/polish", response_model=APIResponse)
+@app.post("/polish-text", response_model=APIResponse)
 async def polish(request: PolishText):
     """
     Polish the sentence and correct the formate of the sentence
@@ -247,7 +265,7 @@ async def polish(request: PolishText):
 
     system_prompt = "Polish the language, correct the grammar, and reformat the following sentence to sound clear and professional."
 
-    prompt = f"Please Polish the sentence and improve the following text:\n\n{request.text}Return only the corrected version without additional explanations."
+    prompt = f"Please Polish the sentence and improve the following text:\n\n{request.text}\n\nReturn only the corrected version without additional explanations."
 
     try:
         result = await call_external_api(prompt, system_prompt)
@@ -371,13 +389,33 @@ async def extract_entities(request: EntityExtractionRequest):
 from fastapi.responses import Response
 
 @app.post("/generate-image")
-async def generate_image(prompt: str):
-    result = await call_external_api_for_image(prompt)
-
-    return Response(
-        content=result["image_bytes"],
-        media_type=result["content_type"]
-    )
+async def generate_image(request: ImageGenerationRequest):
+    """
+    Generate an image from a text description.
+    
+    Args:
+        request: Contains the description of the image to generate
+    
+    Returns:
+        JSON with the image URL (as data URI)
+    """
+    try:
+        result = await call_external_api_for_image(request.description)
+        
+        # Convert image bytes to base64 data URI
+        import base64
+        image_base64 = base64.b64encode(result["image_bytes"]).decode('utf-8')
+        data_uri = f"data:{result['content_type']};base64,{image_base64}"
+        
+        return {
+            "success": True,
+            "image_url": data_uri,
+            "description": request.description
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate image: {str(e)}")
 
 
 

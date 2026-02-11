@@ -5,8 +5,14 @@ A FastAPI application that provides text summarization, grammar correction, and 
 ## Features
 
 1. **Summarize Text** - Generate concise summaries of text
-2. **Grammar Correction** - Correct grammatical errors and improve text clarity
-3. **Entity Extraction** - Extract named entities (persons, organizations, locations, dates, etc.) from text
+2. **Polish Text** - Improve grammar, clarity, and style of your writing
+3. **Generate Images** - Create stunning images from text descriptions
+4. **Grammar Correction** - Correct grammatical errors and improve text clarity
+5. **Entity Extraction** - Extract named entities (persons, organizations, locations, dates, etc.) from text
+
+## Live Demo
+
+Access the beautiful web interface at `http://localhost:8000` after starting the server.
 
 ## Installation
 
@@ -29,23 +35,39 @@ cp .env.example .env
 
 ## Running the Application
 
-Start the server:
+### Quick Start (Recommended)
 ```bash
+./run.sh
+```
+
+### Manual Start
+```bash
+# Using uvicorn
 uvicorn main:app --reload
+
+# Or using Python directly
+python3 main.py
 ```
 
-Or using Python directly:
-```bash
-python main.py
-```
+The application will be available at `http://localhost:8000`
 
-The API will be available at `http://localhost:8000`
+## Web Interface
+
+The application includes a beautiful, modern web interface with:
+- **Responsive Design** - Works perfectly on desktop, tablet, and mobile
+- **Real-time Processing** - Instant feedback and results
+- **Beautiful UI** - Modern gradient design with smooth animations
+- **Easy to Use** - Intuitive interface with clear instructions
+
+Access the web interface at: `http://localhost:8000`
 
 ## API Documentation
 
 Once the server is running, you can access:
-- Interactive API docs: `http://localhost:8000/docs`
-- Alternative docs: `http://localhost:8000/redoc`
+- **Web Interface:** `http://localhost:8000`
+- **Interactive API docs:** `http://localhost:8000/docs`
+- **Alternative docs:** `http://localhost:8000/redoc`
+- **API Info:** `http://localhost:8000/api`
 
 ## Endpoints
 
