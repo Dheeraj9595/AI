@@ -5,14 +5,14 @@ Welcome to AI Studio! This index will help you find the documentation you need.
 ## 📚 Documentation Files
 
 ### Getting Started
-- **[QUICKSTART.md](QUICKSTART.md)** - Get up and running in 5 minutes
+- **[QUICKSTART.md](./QUICKSTART.md)** - Get up and running in 5 minutes
   - Installation steps
   - Quick start commands
   - Basic usage examples
   - Troubleshooting
 
 ### Main Documentation
-- **[README.md](README.md)** - Complete project documentation
+- **[README.md](./README.md)** - Complete project documentation (in docs/)
   - Project overview
   - Features list
   - Installation guide

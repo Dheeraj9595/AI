@@ -53,6 +53,31 @@ function showToast(message, duration = 3000) {
     }, duration);
 }
 
+// Clear functions
+function clearSummarize() {
+    document.getElementById('summarize-input').value = '';
+    document.getElementById('summarize-count').textContent = '0';
+    document.getElementById('summarize-output').textContent = '';
+    document.getElementById('summarize-result').style.display = 'none';
+    showToast('Cleared!');
+}
+
+function clearPolish() {
+    document.getElementById('polish-input').value = '';
+    document.getElementById('polish-count').textContent = '0';
+    document.getElementById('polish-output').textContent = '';
+    document.getElementById('polish-result').style.display = 'none';
+    showToast('Cleared!');
+}
+
+function clearImage() {
+    document.getElementById('image-input').value = '';
+    document.getElementById('image-count').textContent = '0';
+    document.getElementById('generated-image').src = '';
+    document.getElementById('image-result').style.display = 'none';
+    showToast('Cleared!');
+}
+
 // Copy to clipboard
 function copyToClipboard(elementId) {
     const element = document.getElementById(elementId);

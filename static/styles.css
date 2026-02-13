@@ -288,6 +288,24 @@ body {
     color: white;
 }
 
+.btn-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-clear {
+    background: white;
+    color: var(--text-secondary);
+    border: 2px solid var(--border-color);
+}
+
+.btn-clear:hover {
+    background: #f7fafc;
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
+
 /* Result Section */
 .result-section {
     margin-top: 32px;
