@@ -1,3 +1,29 @@
+// Theme toggle
+const THEME_KEY = 'ai-studio-theme';
+
+function initTheme() {
+    const saved = localStorage.getItem(THEME_KEY);
+    const theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+    updateThemeLabel(theme);
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem(THEME_KEY, next);
+    updateThemeLabel(next);
+    showToast(`Switched to ${next} theme`);
+}
+
+function updateThemeLabel(theme) {
+    const label = document.getElementById('theme-label');
+    if (label) label.textContent = theme === 'dark' ? 'Light' : 'Dark';
+}
+
+document.addEventListener('DOMContentLoaded', initTheme);
+
 // Tab switching
 document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
