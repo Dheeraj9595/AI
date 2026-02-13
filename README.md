@@ -73,16 +73,15 @@ ai_workerai/
 
 ## 🔧 Environment Variables
 
-Set the `API_TOKEN` environment variable:
+Create a `.env` file with:
 
-```bash
-export API_TOKEN="your_token_here"
-```
-
-Or create a `.env` file:
 ```
 API_TOKEN=your_token_here
+bytz_api_token=your_bytez_api_key
 ```
+
+- `API_TOKEN` - For text processing (summarize, polish, etc.) and image generation
+- `bytz_api_token` - For video generation (Bytez API)
 
 ## 🚀 Deployment
 

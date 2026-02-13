@@ -460,6 +460,22 @@ body {
     box-shadow: var(--shadow-md);
 }
 
+.video-container {
+    background: var(--input-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.video-container video {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+}
+
 /* Loading Overlay */
 .loading-overlay {
     position: fixed;

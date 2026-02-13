@@ -12,7 +12,7 @@ load_dotenv()
 
 app = FastAPI(
     title="Text Processing API",
-    description="API for text summarization, grammar correction, entity extraction, and image generation",
+    description="API for text summarization, grammar correction, entity extraction, image and video generation",
     version="1.0.0"
 )
 
@@ -32,6 +32,8 @@ app.add_middleware(
 API_URL = "https://dheeraj9595.dheeraj-pandey.workers.dev/"
 API_URL_IMAGE = "https://round-river-1dd8.dheeraj-pandey.workers.dev/"
 API_TOKEN = os.getenv("API_TOKEN", "")
+BYTZ_API_TOKEN = os.getenv("bytz_api_token", os.getenv("BYTZ_API_TOKEN", ""))
+BYTZ_VIDEO_URL = "https://api.bytez.com/models/v2/ali-vilab/text-to-video-ms-1.7b"
 
 
 
@@ -55,6 +57,10 @@ class EntityExtractionRequest1(BaseModel):
 
 class ImageGenerationRequest(BaseModel):
     description: str = Field(..., description="Description of the image to generate", min_length=5)
+
+
+class VideoGenerationRequest(BaseModel):
+    text: str = Field(..., description="Text description for video generation", min_length=3)
 
 # Response Models
 class APIResponse(BaseModel):
@@ -212,6 +218,7 @@ async def api_info():
             "entity-extraction": "/entity-extraction",
             "polish-text": "/polish-text",
             "generate-image": "/generate-image",
+            "generate-video": "/generate-video",
             "health": "/health"
         }
     }
@@ -418,6 +425,132 @@ async def generate_image(request: ImageGenerationRequest):
         raise HTTPException(status_code=500, detail=f"Failed to generate image: {str(e)}")
 
 
+async def call_bytez_video_api(text: str):
+    """Call Bytez API for text-to-video generation."""
+    if not BYTZ_API_TOKEN:
+        raise HTTPException(status_code=500, detail="Bytez API token not configured. Set bytz_api_token in .env")
+    
+    headers = {
+        "Authorization": BYTZ_API_TOKEN,
+        "Content-Type": "application/json"
+    }
+    payload = {"text": text}
+    
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(
+                BYTZ_VIDEO_URL,
+                json=payload,
+                headers=headers
+            )
+            response.raise_for_status()
+            
+            content_type = response.headers.get("content-type", "")
+            
+            # Binary video response
+            if "video" in content_type or "octet-stream" in content_type or content_type.startswith("video/"):
+                return {
+                    "type": "binary",
+                    "content_type": content_type,
+                    "video_bytes": response.content
+                }
+            
+            # JSON response
+            data = response.json()
+            error = data.get("error")
+            if error:
+                raise HTTPException(status_code=500, detail=str(error))
+            
+            output = data.get("output")
+            if output is None:
+                raise HTTPException(status_code=500, detail="No output in API response")
+            
+            # output can be: URL string, base64 string, or object with url/base64
+            if isinstance(output, str):
+                if output.startswith("http"):
+                    return {"type": "url", "video_url": output}
+                if output.startswith("data:"):
+                    return {"type": "data_uri", "video_url": output}
+                try:
+                    video_bytes = base64.b64decode(output)
+                    return {
+                        "type": "base64",
+                        "video_bytes": video_bytes,
+                        "content_type": "video/mp4"
+                    }
+                except Exception:
+                    raise HTTPException(status_code=500, detail="Could not decode video output")
+            
+            if isinstance(output, dict):
+                if "url" in output:
+                    return {"type": "url", "video_url": output["url"]}
+                if "video_url" in output:
+                    return {"type": "url", "video_url": output["video_url"]}
+                if "base64" in output:
+                    video_bytes = base64.b64decode(output["base64"])
+                    return {
+                        "type": "base64",
+                        "video_bytes": video_bytes,
+                        "content_type": output.get("content_type", "video/mp4")
+                    }
+            
+            raise HTTPException(status_code=500, detail="Unsupported video response format")
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Video generation timed out (may take 1-2 minutes)")
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Video generation failed: {str(e)}")
+
+
+@app.post("/generate-video")
+async def generate_video(request: VideoGenerationRequest):
+    """
+    Generate a video from text description using Bytez API.
+    
+    Args:
+        request: Contains the text description for the video
+    
+    Returns:
+        JSON with video_url (data URI or URL) and success status
+    """
+    try:
+        result = await call_bytez_video_api(request.text)
+        
+        if result["type"] == "url":
+            return {
+                "success": True,
+                "video_url": result["video_url"],
+                "description": request.text
+            }
+        
+        if result["type"] == "data_uri":
+            return {
+                "success": True,
+                "video_url": result["video_url"],
+                "description": request.text
+            }
+        
+        if result["type"] in ("binary", "base64"):
+            video_bytes = result["video_bytes"]
+            content_type = result.get("content_type", "video/mp4")
+            video_base64 = base64.b64encode(video_bytes).decode("utf-8")
+            data_uri = f"data:{content_type};base64,{video_base64}"
+            return {
+                "success": True,
+                "video_url": data_uri,
+                "description": request.text
+            }
+        
+        raise HTTPException(status_code=500, detail="Unsupported response format")
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate video: {str(e)}")
 
 
 if __name__ == "__main__":

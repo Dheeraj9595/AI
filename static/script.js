@@ -45,7 +45,8 @@ document.querySelectorAll('.tab').forEach(tab => {
 const textareas = {
     'summarize-input': 'summarize-count',
     'polish-input': 'polish-count',
-    'image-input': 'image-count'
+    'image-input': 'image-count',
+    'video-input': 'video-count'
 };
 
 Object.keys(textareas).forEach(inputId => {
@@ -101,6 +102,16 @@ function clearImage() {
     document.getElementById('image-count').textContent = '0';
     document.getElementById('generated-image').src = '';
     document.getElementById('image-result').style.display = 'none';
+    showToast('Cleared!');
+}
+
+function clearVideo() {
+    document.getElementById('video-input').value = '';
+    document.getElementById('video-count').textContent = '0';
+    const videoEl = document.getElementById('generated-video');
+    videoEl.src = '';
+    videoEl.load();
+    document.getElementById('video-result').style.display = 'none';
     showToast('Cleared!');
 }
 
@@ -251,6 +262,62 @@ function downloadImage() {
     showToast('Image downloaded!');
 }
 
+// Generate video
+async function generateVideo() {
+    const input = document.getElementById('video-input').value.trim();
+    
+    if (!input) {
+        showToast('Please describe the video you want to generate');
+        return;
+    }
+    
+    showLoading();
+    const loadingText = document.querySelector('.loading-text');
+    const originalText = loadingText ? loadingText.textContent : 'Processing...';
+    if (loadingText) loadingText.textContent = 'Generating video... (may take 1-2 minutes)';
+    
+    try {
+        const response = await fetch('/generate-video', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text: input })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to generate video');
+        }
+        
+        const data = await response.json();
+        
+        const videoEl = document.getElementById('generated-video');
+        videoEl.src = data.video_url;
+        document.getElementById('video-result').style.display = 'block';
+        
+        showToast('Video generated successfully!');
+    } catch (error) {
+        showToast('Error: ' + error.message);
+        console.error('Video generation error:', error);
+    } finally {
+        hideLoading();
+        if (loadingText) loadingText.textContent = originalText;
+    }
+}
+
+// Download video
+function downloadVideo() {
+    const video = document.getElementById('generated-video');
+    const link = document.createElement('a');
+    link.href = video.src;
+    link.download = 'generated-video.mp4';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Video downloaded!');
+}
+
 // Enter key support for textareas
 document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.key === 'Enter') {
@@ -265,6 +332,9 @@ document.addEventListener('keydown', (e) => {
                 break;
             case 'image':
                 generateImage();
+                break;
+            case 'video':
+                generateVideo();
                 break;
         }
     }
