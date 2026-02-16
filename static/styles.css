@@ -669,11 +669,34 @@ body {
     }
 
     .nav {
-        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    /* About modal - tablet */
+    .modal-content {
+        padding: 32px 24px;
+        margin: 16px;
+        width: calc(100% - 32px);
+        max-height: calc(100vh - 32px);
+    }
+
+    .modal-title {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .about-text {
+        font-size: 15px;
     }
 }
 
 @media (max-width: 480px) {
+    .container {
+        padding: 0 16px;
+    }
+
     .hero-title {
         font-size: 28px;
     }
@@ -682,12 +705,113 @@ body {
         font-size: 16px;
     }
 
+    .hero {
+        margin-bottom: 40px;
+    }
+
     .card-title {
         font-size: 24px;
+    }
+
+    .card {
+        padding: 20px 16px;
     }
 
     .btn {
         width: 100%;
         justify-content: center;
+    }
+
+    .btn-group {
+        flex-direction: column;
+    }
+
+    .btn-group .btn {
+        width: 100%;
+    }
+
+    /* About modal - mobile */
+    .modal-overlay {
+        padding: 12px;
+        align-items: flex-start;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-overlay.open {
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .modal-content {
+        padding: 24px 20px;
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+        min-height: 100vh;
+        max-height: 100vh;
+        max-height: 100dvh;
+        overflow-y: auto;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-close {
+        top: 12px;
+        right: 12px;
+        font-size: 32px;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+    }
+
+    .modal-title {
+        font-size: 22px;
+        margin-bottom: 16px;
+        padding-right: 40px;
+    }
+
+    .about-text {
+        font-size: 15px;
+        margin-bottom: 14px;
+    }
+
+    .about-owner {
+        margin-top: 20px;
+        padding-top: 20px;
+    }
+
+    .about-owner p {
+        font-size: 14px;
+    }
+
+    .about-contact {
+        font-size: 13px !important;
+    }
+
+    .about-contact a {
+        word-break: break-all;
+    }
+
+    /* Tabs on mobile - smaller padding */
+    .tabs {
+        padding: 6px;
+    }
+
+    .tab {
+        padding: 14px 16px;
+        font-size: 14px;
+    }
+
+    /* Toast - mobile positioning */
+    .toast {
+        left: 16px;
+        right: 16px;
+        bottom: 20px;
     }
 }
