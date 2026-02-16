@@ -50,7 +50,7 @@
                     <span class="theme-label" id="theme-label">Light</span>
                 </button>
                 <a href="#" class="nav-link active">Home</a>
-                <a href="#" class="nav-link">About</a>
+                <a href="#" class="nav-link" onclick="openAboutModal(event)">About</a>
                 <a href="/docs" class="nav-link" target="_blank">API Docs</a>
             </nav>
         </header>
@@ -319,6 +319,30 @@
         <div class="loading-overlay" id="loading">
             <div class="spinner"></div>
             <p class="loading-text">Processing...</p>
+        </div>
+
+        <!-- About Modal -->
+        <div class="modal-overlay" id="about-modal" onclick="closeAboutModal(event)">
+            <div class="modal-content about-modal" onclick="event.stopPropagation()">
+                <button class="modal-close" onclick="closeAboutModal()" aria-label="Close">&times;</button>
+                <h2 class="modal-title">About AI Studio</h2>
+                <p class="about-text">
+                    AI Studio is an interactive playground designed for AI enthusiasts, developers, and curious minds 
+                    who want to explore the power of artificial intelligence. Experiment with text summarization, 
+                    grammar refinement, image generation, and video creation—all in one place.
+                </p>
+                <p class="about-text">
+                    Whether you're learning, prototyping, or simply curious about what AI can do, this platform 
+                    offers a hands-on space to discover and leverage cutting-edge AI capabilities.
+                </p>
+                <div class="about-owner">
+                    <p><strong>Created by</strong> Dheeraj Pandey</p>
+                    <p class="about-contact">
+                        Have ideas for new features, enhancements, or feedback? We'd love to hear from you.
+                        Reach out at <a href="mailto:dheeraj.9595@gmail.com">dheeraj.9595@gmail.com</a>
+                    </p>
+                </div>
+            </div>
         </div>
 
         <!-- Toast Notification -->

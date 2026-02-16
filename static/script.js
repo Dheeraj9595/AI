@@ -22,6 +22,24 @@ function updateThemeLabel(theme) {
     if (label) label.textContent = theme === 'dark' ? 'Light' : 'Dark';
 }
 
+function openAboutModal(e) {
+    if (e) e.preventDefault();
+    document.getElementById('about-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAboutModal(e) {
+    if (e && e.target !== e.currentTarget) return;
+    document.getElementById('about-modal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('about-modal').classList.contains('open')) {
+        closeAboutModal();
+    }
+});
+
 document.addEventListener('DOMContentLoaded', initTheme);
 
 // Tab switching
